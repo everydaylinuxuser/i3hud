@@ -1,0 +1,81 @@
+app-id: com.github.everydaylinuxuser.i3hud
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: i3hud
+
+finish-args:
+  # Display permissions for i3 (X11)
+  - --socket=x11
+  - --share=ipc
+  # Access to runtime directories and user i3/i3-hud config directories
+  - --filesystem=xdg-run/*:ro
+  - --filesystem=xdg-config/i3:ro
+  - --filesystem=~/.config/i3:ro
+  - --filesystem=xdg-config/i3-hud
+  - --filesystem=~/.config/i3-hud
+
+modules:
+  # 1. Tcl dependency
+  - name: tcl
+    buildsystem: autotools
+    subdir: unix
+    post-install:
+      - chmod u+w ${FLATPAK_DEST}/lib/libtcl8.6.so
+    sources:
+      - type: archive
+        url: https://prdownloads.sourceforge.net/tcl/tcl8.6.13-src.tar.gz
+        sha256: 43a1fae7412f61ff11de2cfd05d28cfc3a73762f354a417c62370a54e2caf066
+
+  # 2. Tk dependency
+  - name: tk
+    buildsystem: autotools
+    subdir: unix
+    config-opts:
+      - --with-tcl=/app/lib
+    post-install:
+      - chmod u+w ${FLATPAK_DEST}/lib/libtk8.6.so
+    sources:
+      - type: archive
+        url: https://prdownloads.sourceforge.net/tcl/tk8.6.13-src.tar.gz
+        sha256: 2e65fa069a23365440a3c56c556b8673b5e32a283800d8d9b257e3f584ce0675
+
+  # 3. Build _tkinter and install tkinter to standard site-packages
+  - name: python-tkinter
+    buildsystem: simple
+    build-commands:
+      # Create site-packages directory where Python searches by default
+      - mkdir -p ${FLATPAK_DEST}/lib/python3.11/site-packages/lib-dynload
+
+      # Compile _tkinter C extension
+      - gcc -shared -fPIC Modules/_tkinter.c -o ${FLATPAK_DEST}/lib/python3.11/site-packages/_tkinter.so -I/usr/include/python3.11 -I/app/include -L/app/lib -ltcl8.6 -ltk8.6 -lX11
+
+      # Copy standard Python tkinter modules to site-packages
+      - cp -r Lib/tkinter ${FLATPAK_DEST}/lib/python3.11/site-packages/
+    sources:
+      - type: archive
+        url: https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tar.xz
+        sha256: 85cd12e9cf1d6d5a45f17f7afe1cebe7ee628d3282281c492e86adf636defa3f
+
+  # 4. Copy Python app + Shell wrapper
+  - name: i3hud
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 i3_hud.py ${FLATPAK_DEST}/bin/i3_hud_bin.py
+
+      - |
+        cat <<'EOF' > ${FLATPAK_DEST}/bin/i3hud
+        #!/bin/sh
+        export TCL_LIBRARY=/app/lib/tcl8.6
+        export TK_LIBRARY=/app/lib/tk8.6
+        export LD_LIBRARY_PATH=/app/lib:${LD_LIBRARY_PATH}
+        mkdir -p "${HOME}/.config/i3-hud"
+        exec python3 /app/bin/i3_hud_bin.py --config "${HOME}/.config/i3/config" --hud-config "${HOME}/.config/i3-hud/i3_hud_config.json" "$@"
+        EOF
+      - chmod +x ${FLATPAK_DEST}/bin/i3hud
+
+      - install -Dm644 com.github.everydaylinuxuser.i3hud.desktop ${FLATPAK_DEST}/share/applications/com.github.everydaylinuxuser.i3hud.desktop
+      - install -Dm644 com.github.everydaylinuxuser.i3hud.jpeg ${FLATPAK_DEST}/share/icons/hicolor/128x128/apps/com.github.everydaylinuxuser.i3hud.jpeg
+    sources:
+      - type: dir
+        path: .

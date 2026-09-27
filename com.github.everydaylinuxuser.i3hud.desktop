@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=i3hud
+Comment=HUD application for i3 window manager
+Exec=i3hud
+Icon=com.github.everydaylinuxuser.i3hud.jpeg
+Terminal=false
+Type=Application
+Categories=Utility;

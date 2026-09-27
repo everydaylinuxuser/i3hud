@@ -7,3 +7,10 @@ ENV/
 .env
 .idea/
 .vscode/
+# Flatpak build directories & caches
+.flatpak-builder/
+build-dir/
+*.flatpak
+
+# Local runtime testing files
+.config/
