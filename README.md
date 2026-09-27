@@ -43,3 +43,34 @@ The HUD config is a JSON object where each key is the action and each value is t
 ```
 
 The modifier value appears in the HUD's top modifier row. Change it in the **Modifier key** field in **Edit config**, or edit `_settings.modifier` directly in `i3_hud_config.json`. If it is not set, the HUD infers the most common modifier from the bindings.
+
+## Add to I3 config as a toggle
+
+Add the following lines to your I3 config file
+
+```
+for_window [title = "i3 Hud"] floating enable, move position center
+bindsym $mod+Shift+h exec --nostartup-id ~/.local/bin/i3-hud-toggle
+
+```
+
+Create the following file in .local/bin/i3-hud-toggle
+
+```
+#!/bin/sh
+
+if i3-msg -t get_tree | grep -q '"title":"i3 HUD"'; then
+    i3-msg '[title="i3 HUD"] kill'
+else
+    i3-hud
+fi
+
+```
+
+Make the script executable
+
+```
+chmod +x ~/.local/bin/i3-hud-huddle
+```
+
+Restart I3
