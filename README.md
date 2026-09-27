@@ -54,6 +54,7 @@ bindsym $mod+Shift+h exec --nostartup-id ~/.local/bin/i3-hud-toggle
 
 ```
 
+### Debian package
 Create the following file in .local/bin/i3-hud-toggle
 
 ```
@@ -63,6 +64,19 @@ if i3-msg -t get_tree | grep -q '"title":"i3 HUD"'; then
     i3-msg '[title="i3 HUD"] kill'
 else
     i3-hud
+fi
+
+```
+
+### Flatpak
+
+```
+#!/bin/sh
+
+if i3-msg -t get_tree | grep -q '"title":"i3 HUD"'; then
+    i3-msg '[title="i3 HUD"] kill'
+else
+    flatpak run com.github.com/everydaylinuxuser.i3hud
 fi
 
 ```
