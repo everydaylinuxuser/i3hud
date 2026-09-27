@@ -1,0 +1,11 @@
+Package: i3-hud
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Gary Newell
+Installed-Size: 35
+Depends: python3, python3-tk
+Section: utils
+Priority: optional
+Description: Keyboard shortcut HUD for the i3 window manager
+ A lightweight Python/Tkinter HUD that displays i3 keyboard
+ shortcuts and provides an editor for custom shortcut descriptions.

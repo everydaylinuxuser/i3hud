@@ -1,0 +1,5 @@
+#!/bin/sh
+
+exec python3 /usr/share/i3-hud/i3_hud.py \
+    --config "$HOME/.config/i3/config" \
+    "$@"
