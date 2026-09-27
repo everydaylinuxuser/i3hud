@@ -11,6 +11,6 @@ ENV/
 .flatpak-builder/
 build-dir/
 *.flatpak
-
+releases/
 # Local runtime testing files
 .config/
